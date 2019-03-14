@@ -24,7 +24,7 @@ echo "Este script instala y pre-configura CentOS Web Panel (CTRL + C para cancel
 sleep 10
 
 echo "####### CONFIGURANDO CENTOS #######"
-wget https://raw.githubusercontent.com/wnpower/Linux-Config/master/configure_centos.sh && bash configure_centos.sh
+wget https://raw.githubusercontent.com/wnpower/Linux-Config/master/configure_centos.sh -O "$CWD/configure_centos.sh" && bash "$CWD/configure_centos.sh"
 
 echo "####### PRE-CONFIGURACION CWP ##########"
 echo "Desactivando yum-cron..."
@@ -63,6 +63,11 @@ else
 	echo "Se va a instalar CWP. Al final de la instalación copiá los datos de acceso que te va a mostrar. Luego te pedirá de reiniciar. Luego de reiniciar, volvé a ejecutar este script para que termine de configurarlo."
 	sleep 15
         cd /usr/local/src; wget http://centos-webpanel.com/cwp-el7-latest; sh cwp-el7-latest
+	echo ""
+	echo "#############################################################################################"
+	echo "PRIMER ETAPA TERMINADA. REINICIA EL SERVIDOR Y VUELVE A EJECUTAR ESTE SCRIPT: bash $0"
+	echo "#############################################################################################"
+	exit 1
 fi
 echo "####### FIN INSTALANDO CWP #######"
 
@@ -163,6 +168,8 @@ EOF
 
 csf -r
 service lfd restart
+chkconfig csf on
+chkconfig lfd on
 
 echo "####### FIN CONFIGURANDO CSF #######"
 
