@@ -166,6 +166,7 @@ cat > /etc/csf/csf.rignore << EOF
 .search.msn.com
 EOF
 
+csf -e
 csf -r
 service lfd restart
 chkconfig csf on
