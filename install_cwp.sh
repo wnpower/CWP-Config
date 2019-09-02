@@ -93,7 +93,9 @@ sed -i 's/^DENY_IP_LIMIT = .*/DENY_IP_LIMIT = "400"/g' /etc/csf/csf.conf
 sed -i 's/^SAFECHAINUPDATE = .*/SAFECHAINUPDATE = "1"/g' /etc/csf/csf.conf
 sed -i 's/^CC_DENY = .*/CC_DENY = ""/g' /etc/csf/csf.conf
 sed -i 's/^CC_IGNORE = .*/CC_IGNORE = ""/g' /etc/csf/csf.conf
-sed -i 's/^SMTP_BLOCK = .*/SMTP_BLOCK = "1"/g' /etc/csf/csf.conf
+# sed -i 's/^SMTP_BLOCK = .*/SMTP_BLOCK = "1"/g' /etc/csf/csf.conf # DIFICIL CONFIGURACION POSTERIOR
+sed -i 's/^SMTP_ALLOWGROUP = .*/SMTP_ALLOWGROUP = "mail,mailman,postfix"/g' /etc/csf/csf.conf
+
 sed -i 's/^LF_FTPD = .*/LF_FTPD = "30"/g' /etc/csf/csf.conf
 sed -i 's/^LF_SMTPAUTH = .*/LF_SMTPAUTH = "90"/g' /etc/csf/csf.conf
 sed -i 's/^LF_EXIMSYNTAX = .*/LF_EXIMSYNTAX = "0"/g' /etc/csf/csf.conf
@@ -166,6 +168,49 @@ cat > /etc/csf/csf.rignore << EOF
 .search.msn.com
 EOF
 
+echo "Activando DYNDNS..."
+sed -i 's/^DYNDNS = .*/DYNDNS = "300"/' /etc/csf/csf.conf
+sed -i 's/^DYNDNS_IGNORE = .*/DYNDNS_IGNORE = "1"/' /etc/csf/csf.conf
+
+echo "Agregando a csf.dyndns..."
+sed -i '/gmail.com/d' /etc/csf/csf.dyndns
+sed -i '/public.pyzor.org/d' /etc/csf/csf.dyndns
+echo "tcp|out|d=25|d=smtp.gmail.com" >> /etc/csf/csf.dyndns
+echo "tcp|out|d=465|d=smtp.gmail.com" >> /etc/csf/csf.dyndns
+echo "tcp|out|d=587|d=smtp.gmail.com" >> /etc/csf/csf.dyndns
+echo "tcp|out|d=995|d=imap.gmail.com" >> /etc/csf/csf.dyndns
+echo "tcp|out|d=993|d=imap.gmail.com" >> /etc/csf/csf.dyndns
+echo "tcp|out|d=143|d=imap.gmail.com" >> /etc/csf/csf.dyndns
+echo "udp|out|d=24441|d=public.pyzor.org" >> /etc/csf/csf.dyndns
+
+echo "Activando soporte para IPV6..."
+sed -i 's/^IPV6 = .*/IPV6 = "1"/' /etc/csf/csf.conf
+TCP_IN=$(grep "^TCP_IN = " /etc/csf/csf.conf | awk '{ print $3 }')
+TCP_OUT=$(grep "^TCP_OUT = " /etc/csf/csf.conf | awk '{ print $3 }')
+UDP_IN=$(grep "^UDP_IN = " /etc/csf/csf.conf | awk '{ print $3 }')
+UDP_OUT=$(grep "^UDP_OUT = " /etc/csf/csf.conf | awk '{ print $3 }')
+
+sed -i "s/^TCP6_IN = .*/TCP6_IN = $TCP_IN/" /etc/csf/csf.conf
+sed -i "s/^TCP6_OUT = .*/TCP6_OUT = $TCP_OUT/" /etc/csf/csf.conf
+sed -i "s/^UDP6_IN = .*/UDP6_IN = $UDP_IN/" /etc/csf/csf.conf
+sed -i "s/^UDP6_OUT = .*/UDP6_OUT = $UDP_OUT/" /etc/csf/csf.conf
+
+echo "Configurando puertos adicionales..."
+ADDITIONAL_PORTS="25,465,587"
+# IPv4
+CURR_CSF_IN=$(grep "^TCP_IN" /etc/csf/csf.conf | cut -d'=' -f2 | sed 's/\ //g' | sed 's/\"//g' | sed "s/,$ADDITIONAL_PORTS,/,/g" | sed "s/,$ADDITIONAL_PORTS//g" | sed "s/$ADDITIONAL_PORTS,//g" | sed "s/,,//g")
+sed -i "s/^TCP_IN.*/TCP_IN = \"$CURR_CSF_IN,$ADDITIONAL_PORTS\"/" /etc/csf/csf.conf
+
+CURR_CSF_OUT=$(grep "^TCP_OUT" /etc/csf/csf.conf | cut -d'=' -f2 | sed 's/\ //g' | sed 's/\"//g' | sed "s/,$ADDITIONAL_PORTS,/,/g" | sed "s/,$ADDITIONAL_PORTS//g" | sed "s/$ADDITIONAL_PORTS,//g" | sed "s/,,//g")
+sed -i "s/^TCP_OUT.*/TCP_OUT = \"$CURR_CSF_OUT,$ADDITIONAL_PORTS\"/" /etc/csf/csf.conf
+
+# IPv6
+CURR_CSF_IN6=$(grep "^TCP6_IN" /etc/csf/csf.conf | cut -d'=' -f2 | sed 's/\ //g' | sed 's/\"//g' | sed "s/,$ADDITIONAL_PORTS,/,/g" | sed "s/,$ADDITIONAL_PORTS//g" | sed "s/$ADDITIONAL_PORTS,//g" | sed "s/,,//g")
+sed -i "s/^TCP6_IN.*/TCP6_IN = \"$CURR_CSF_IN6,$ADDITIONAL_PORTS\"/" /etc/csf/csf.conf
+
+CURR_CSF_OUT6=$(grep "^TCP6_OUT" /etc/csf/csf.conf | cut -d'=' -f2 | sed 's/\ //g' | sed 's/\"//g' | sed "s/,$ADDITIONAL_PORTS,/,/g" | sed "s/,$ADDITIONAL_PORTS//g" | sed "s/$ADDITIONAL_PORTS,//g" | sed "s/,,//g")
+sed -i "s/^TCP6_OUT.*/TCP6_OUT = \"$CURR_CSF_OUT6,$ADDITIONAL_PORTS\"/" /etc/csf/csf.conf
+
 csf -e
 csf -r
 service lfd restart
@@ -224,6 +269,11 @@ if [ -f /usr/share/zoneinfo/America/Buenos_Aires ]; then
 fi
 echo "Seteando fecha del BIOS..."
 hwclock -r
+
+echo "Configurando Postfix..."
+sed -i '/^inet_protocols.*/d' /etc/postfix/main.cf
+echo "inet_protocols = all" >> /etc/postfix/main.cf
+service postfix restart
 
 history -c
 echo "" > /root/.bash_history
