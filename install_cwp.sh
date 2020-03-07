@@ -60,7 +60,7 @@ if [ -d /usr/local/cwpsrv/ ]; then
         echo "CWP ya detectado, no se instala, sólo se configura (CTRL + C para cancelar)"
         sleep 10
 else
-	echo "Se va a instalar CWP. Al final de la instalación copiá los datos de acceso que te va a mostrar. Luego te pedirá de reiniciar. Luego de reiniciar, volvé a ejecutar este script para que termine de configurarlo."
+	echo "Se va a instalar CWP. Al final de la instalación recuerda tomar nota de los datos de acceso que te brinde y reincia el sistema."
 	sleep 15
         cd /usr/local/src; wget http://centos-webpanel.com/cwp-el7-latest; sh cwp-el7-latest
 	echo ""
