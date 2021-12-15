@@ -62,7 +62,16 @@ if [ -d /usr/local/cwpsrv/ ]; then
 else
 	echo "Se va a instalar CWP. Al final de la instalación recuerda tomar nota de los datos de acceso que te brinde y reincia el sistema."
 	sleep 15
-        cd /usr/local/src; wget http://centos-webpanel.com/cwp-el7-latest; sh cwp-el7-latest
+        cd /usr/local/src
+	
+	if grep -i "release 8" /etc/redhat-release > /dev/null; then
+		wget http://centos-webpanel.com/cwp-el8-latest; sh cwp-el8-latest
+	elif grep -i "release 7" /etc/redhat-release > /dev/null; then
+		wget http://centos-webpanel.com/cwp-el7-latest; sh cwp-el7-latest
+	else
+		echo "No se detectó SO, abortando."
+		exit 1 
+	fi
 	echo ""
 	exit 1
 fi
