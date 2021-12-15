@@ -287,6 +287,9 @@ yum remove clamav* -y
 
 csf -e
 
+echo "Desactivando backups por default..."
+mysql -uroot root_cwp -e "UPDATE backups SET backup_enable = 'off' WHERE id='1'";
+
 history -c
 echo "" > /root/.bash_history
 
