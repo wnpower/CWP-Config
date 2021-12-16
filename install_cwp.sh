@@ -72,8 +72,6 @@ else
 		echo "No se detectó SO, abortando."
 		exit 1 
 	fi
-	echo ""
-	exit 1
 fi
 echo "####### FIN INSTALANDO CWP #######"
 
