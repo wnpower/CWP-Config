@@ -287,6 +287,9 @@ mysql --defaults-file=/root/.my.cnf root_cwp -e "UPDATE backups SET backup_enabl
 # Activar CSF
 /usr/sbin/csf -e
 
+echo "Instalando Policyd..."
+sh /scripts/install_cbpolicyd
+
 history -c
 echo "" > /root/.bash_history
 
